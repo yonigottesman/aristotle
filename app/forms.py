@@ -32,5 +32,9 @@ class RegistrationForm(FlaskForm):
 
 class AddRunForm(FlaskForm):
     description = StringField('Description', validators=[DataRequired()])
-    run_result = TextAreaField('Run Output', validators=[Length(min=0, max=1540)])
+    run_result = TextAreaField('Run Output', validators=[Length(min=0, max=1540), DataRequired()])
     submit = SubmitField('Add')
+
+class AddExperimentForm(FlaskForm):
+    description = StringField('Description', validators=[DataRequired()])
+    submit = SubmitField('Add')    

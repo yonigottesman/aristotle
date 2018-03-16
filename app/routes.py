@@ -4,8 +4,8 @@ from app.forms import LoginForm
 from flask_login import current_user, login_user
 from flask_login import logout_user
 from flask_login import login_required
-from app.models import User, Run
-from app.forms import RegistrationForm, AddRunForm
+from app.models import User, Run, Experiment
+from app.forms import RegistrationForm, AddRunForm, AddExperimentForm
 from app import db
 from flask import request
 from werkzeug.urls import url_parse
@@ -16,15 +16,16 @@ from werkzeug.urls import url_parse
 @login_required
 def index():
     form = AddRunForm()
+    add_experiment_form = AddExperimentForm()
     if form.validate_on_submit():
         run = Run(description=form.description.data,
                   run_result=form.run_result.data, owner=current_user)
         db.session.add(run)
         db.session.commit()
         return redirect(url_for('index'))
-    
+    experiments = current_user.experiments.all()
     runs = current_user.runs.all()
-    return render_template("index.html", title='Home Page', runs=runs, form=form)
+    return render_template("index.html", title='Home Page', runs=runs, form=form, add_experiment_form=add_experiment_form, experiments=experiments)
 
 
 
@@ -68,12 +69,12 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 
-# @app.route('/add_work', methods=['POST'])
-# @login_required
-# def add_work():
-#     task_id = request.form['task_id']
-#     add_amount = int(request.form['amount'])
-#     task = Task.query.get(task_id)
-#     task.progress = task.progress + add_amount
-#     db.session.commit()
-#     return jsonify({'new_progress':task.progress})
+@app.route('/add_experiment', methods=['GET', 'POST'])
+def add_experiment():
+    form = AddExperimentForm()
+    if form.validate_on_submit():
+        experiment = Experiment(description=form.description.data, owner=current_user)
+        db.session.add(experiment)
+        db.session.commit()
+        return redirect(url_for('index'))
+    return redirect(url_for('index'))    

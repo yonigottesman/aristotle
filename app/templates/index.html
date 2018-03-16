@@ -1,12 +1,37 @@
 {% extends "base.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
+
 {% block app_content %}
-<!-- <h1>Hi, {{ current_user.username }}!</h1> -->
 
-{{ wtf.quick_form(form) }}
-<br>
 
-{% for run in runs %}
-{% include '_run.html' %}
-{% endfor %}
-{% endblock %}
+  <div class="row">
+    <div class="col-sm-3">
+
+      <h3>Experiments</h3>
+      <ul class="list-group list-group-flush">
+        {% for experiment in experiments %}
+        <a href="#" class="list-group-item list-group-item-action">{{experiment.description}}</a>        
+        {% endfor %}
+        <li class="list-group-item list-group-item-action">      {{ wtf.quick_form(add_experiment_form, action=url_for('add_experiment'))}}</li>
+      </ul>
+
+
+      
+    </div>
+    <div class="col-lg-7">
+
+      <h3>Runs</h3>      
+      {% for run in runs %}
+      {% include '_run.html' %}
+      {% endfor %}
+      <br>            
+      {{ wtf.quick_form(form,form_type="",horizontal_columns=('sm', 1, 1)) }}
+
+
+
+    </div>
+
+  </div>
+
+
+  {% endblock %}
