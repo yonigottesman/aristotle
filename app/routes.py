@@ -11,21 +11,41 @@ from flask import request
 from werkzeug.urls import url_parse
 
 
+@app.route('/experiment/<experiment_id>', methods=['GET', 'POST'])
+def experiment(experiment_id):
+
+    Experiment.query.filter_by(id=experiment_id).first_or_404()
+    
+    form = AddRunForm()
+    add_experiment_form = AddExperimentForm()
+    if form.validate_on_submit():
+        run = Run(description=form.description.data
+                  , run_result=form.run_result.data, owner=current_user
+                  , experiment_id=int(experiment_id))
+        
+        db.session.add(run)
+        db.session.commit()
+        return redirect(url_for('experiment',experiment_id=experiment_id))
+    experiments = current_user.experiments.all()
+
+    runs = current_user.runs.filter(Run.experiment_id==int(experiment_id))
+    return render_template("index.html", title='Home Page', runs=runs, form=form
+                           , add_experiment_form=add_experiment_form
+                           , experiments=experiments
+                           , experiment_id=int(experiment_id))
+    
+
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
-    form = AddRunForm()
+
     add_experiment_form = AddExperimentForm()
-    if form.validate_on_submit():
-        run = Run(description=form.description.data,
-                  run_result=form.run_result.data, owner=current_user)
-        db.session.add(run)
-        db.session.commit()
-        return redirect(url_for('index'))
     experiments = current_user.experiments.all()
-    runs = current_user.runs.all()
-    return render_template("index.html", title='Home Page', runs=runs, form=form, add_experiment_form=add_experiment_form, experiments=experiments)
+
+    return render_template("index.html", title='Home Page', runs=None, form=None
+                           , add_experiment_form=add_experiment_form
+                           , experiments=experiments)
 
 
 
@@ -73,8 +93,11 @@ def register():
 def add_experiment():
     form = AddExperimentForm()
     if form.validate_on_submit():
-        experiment = Experiment(description=form.description.data, owner=current_user)
+        experiment = Experiment(description=form.description.data
+                                , owner=current_user)
         db.session.add(experiment)
         db.session.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('experiment', experiment_id=experiment.id))
+    
+    #TODO flash an error?
     return redirect(url_for('index'))    

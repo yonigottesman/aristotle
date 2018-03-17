@@ -9,8 +9,10 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    runs = db.relationship('Run', backref='owner', lazy='dynamic')
-    experiments = db.relationship('Experiment', backref='owner', lazy='dynamic')
+    runs = db.relationship('Run', backref='owner', lazy='dynamic'
+                           , cascade='delete')
+    experiments = db.relationship('Experiment', backref='owner', lazy='dynamic'
+                                  , cascade='delete')
 
     
     def __repr__(self):
@@ -26,7 +28,8 @@ class User(UserMixin, db.Model):
 class Experiment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(50))
-    runs = db.relationship('Run', backref='experiment', lazy='dynamic')
+    runs = db.relationship('Run', backref='experiment', lazy='dynamic'
+                           , cascade='delete')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     
     def __repr__(self):

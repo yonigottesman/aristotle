@@ -1,14 +1,11 @@
-<table class="table table-hover">
 
-  <tr>
-    <td>
-      <a href="#">{{ run.description }}</a>
-      <br>
-      {{ run.run_result }}
-    </td>
-  </tr>
+<div class="list-group">
+  <a  class="list-group-item list-group-item-action flex-column align-items-start">
+    <div class="d-flex w-100 justify-content-between ">
+      <h5 class="mb-1">{{ run.description }}</h5>
+    </div>
+    <p class="mb-1">{{ run.run_result }}</p>
+  </a>
 
+</div>
 
-
-
-</table>
