@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+
+
+<div class="row">
+  <div class="col-sm-3">
+    {% include '_experiments.html' %}      
+  </div>
+  <!-- Add new run form -->
+
+  
+  <div class="col-lg-9">
+    
+    <!-- setting -->
+    <div class="container">
+      <div class="row">
+        <a href="{{ url_for('experiment_settings',experiment_id=experiment_id) }}">
+          <span class="glyphicon glyphicon-pencil"></span> Settings
+        </a>
+      </div>
+    </div>
+    
+    </br>
+
+    <div class="row table-responsive text-nowrap">
+      <table class="table table-hover">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            {% for i in column_range %}
+            <th scope="col">{{columns[i]}}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in table %}
+          <!-- onclick="window.location='{{ url_for('run',experiment_id=experiment_id,run_id=row['run_id']) }}';" -->
+          <tr>
+            <td><input type="checkbox"/></td>
+            <td><a href="{{ url_for('run',experiment_id=experiment_id,run_id=row['run_id']) }}">view</a></td>          
+            {% for i in column_range %}
+            <td>{{row['columns'][i]}}</td>          
+            {% endfor %}
+          </tr>        
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    
+</br>
+    
+    <div class="list-group">
+      <li class="list-group-item list-group-item-action ">{{ wtf.quick_form(form,form_type="",horizontal_columns=('sm', 1, 1)) }}</li>
+    </div>
+    
+  </div>
+</div>
+
+{% endblock %}

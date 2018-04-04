@@ -27,11 +27,12 @@ class User(UserMixin, db.Model):
 
 class Experiment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.String(50))
+    description = db.Column(db.String(150))
+    columns = db.Column(db.String(400))
     runs = db.relationship('Run', backref='experiment', lazy='dynamic'
                            , cascade='delete')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    
+    column_extract_code = db.Column(db.String(600))
     def __repr__(self):
         return '<Experiment {}>'.format(self.description)    
 
@@ -42,7 +43,8 @@ class Run(db.Model):
     run_result = db.Column(db.String(500))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     experiment_id = db.Column(db.Integer, db.ForeignKey('experiment.id'))
-
+    columns = db.Column(db.String(400))
+    
     def __repr__(self):
         return '<Run {}>'.format(self.description)    
 

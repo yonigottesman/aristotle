@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+
+
+  <div class="row">
+    <div class="col-sm-3">
+      {% include '_experiments.html' %}      
+    </div>
+    
+
+    <div class="col-lg-9">
+      <h1>
+        {{run.description}}
+      </h1>      
+
+      <p>Run Configuration:</p>
+      
+      <pre>
+        {{run.run_result}}
+      </pre>
+
+
+
+    <div class="list-group">
+
+      <li class="list-group-item list-group-item-action ">
+        {{ wtf.quick_form(form,form_type="",horizontal_columns=('sm', 1, 1)) }}
+      </li>
+    </div>
+
+        
+    </div>
+  </div>
+  
+{% endblock %}
