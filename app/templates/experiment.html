@@ -2,18 +2,12 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-
-
-
 <div class="row">
   <div class="col-sm-3">
     {% include '_experiments.html' %}      
   </div>
-  <!-- Add new run form -->
-
   
   <div class="col-lg-9">
-    
     <!-- setting -->
     <div class="container">
       <div class="row">
@@ -23,41 +17,74 @@
       </div>
     </div>
     
-    </br>
+    <br>
+    <!-- table -->
+    <form action="{{ url_for('select_compare',experiment_id=experiment_id)}}" method="post">    
+      <div class="row table-responsive text-nowrap ">
+        <table class="table table-hover table-striped table-bordered table-hover model-list">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col"></th>
+              <th scope="col"></th>
+              {% for i in column_range %}
+              <th scope="col">{{columns[i]}}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table %}
+            <tr>
+              <td> <input type="checkbox" name="rowid" class="action-checkbox select-run" value={{row['run_id']}} title="Select record"></td>
+              <td><a href="{{ url_for('run',experiment_id=experiment_id,run_id=row['run_id']) }}">view</a></td>          
+              {% for i in column_range %}
+              <td>{{row['columns'][i]}}</td>          
+              {% endfor %}
+            </tr>        
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <button type="submit" class="btn btn-primary">Compare</button>
+    </form>
+    
+    <br>
 
-    <div class="row table-responsive text-nowrap">
-      <table class="table table-hover">
-        <thead class="thead-dark">
-          <tr>
-            <th scope="col"></th>
-            <th scope="col"></th>
-            {% for i in column_range %}
-            <th scope="col">{{columns[i]}}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in table %}
-          <!-- onclick="window.location='{{ url_for('run',experiment_id=experiment_id,run_id=row['run_id']) }}';" -->
-          <tr>
-            <td><input type="checkbox"/></td>
-            <td><a href="{{ url_for('run',experiment_id=experiment_id,run_id=row['run_id']) }}">view</a></td>          
-            {% for i in column_range %}
-            <td>{{row['columns'][i]}}</td>          
-            {% endfor %}
-          </tr>        
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    
-</br>
-    
     <div class="list-group">
-      <li class="list-group-item list-group-item-action ">{{ wtf.quick_form(form,form_type="",horizontal_columns=('sm', 1, 1)) }}</li>
+      
+      <li class="list-group-item list-group-item-action ">
+        <form action="" method="post">
+          {{ form.hidden_tag() }}
+          <div class="form-group {% if form.description.errors %} has-error {% endif %} ">
+            {{form.description.label}}
+            {{form.description(placeholder="Description of run", class="form-control") }}
+            {% for error in form.description.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+          </div>
+          
+          <div class="form-group ">
+            {{form.columns.label}}
+            {{form.columns(class="form-control", placeholder="arg1=val1, arg2=val2...")}}
+          </div>
+          
+          <div class="form-group ">
+            {{form.run_result.label}}
+            {{form.run_result(class="form-control",rows="5",placeholder="")}}
+          </div>
+          {{form.submit(class="btn btn-default")}}
+        </form>
+      </li>
     </div>
     
   </div>
 </div>
 
+
 {% endblock %}
+
+
+
+
+
+
+

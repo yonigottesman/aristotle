@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, flash, redirect, url_for, jsonify
+from flask import render_template, flash, redirect, url_for
 from app.forms import LoginForm
 from flask_login import current_user, login_user
 from flask_login import logout_user
@@ -13,6 +13,26 @@ from RestrictedPython import compile_restricted
 from AccessControl.ZopeGuards import get_safe_globals
 
 
+@login_required
+@app.route('/experiment/<experiment_id>/compare', methods=['GET', 'POST'])
+def compare(experiment_id):
+    run1_id = request.args.get('run1')
+    run2_id = request.args.get('run2')
+    run1 = Run.query.filter_by(id=run1_id, user_id=current_user.id).first_or_404()
+    run2 = Run.query.filter_by(id=run2_id, user_id=current_user.id).first_or_404()
+    
+    return render_template("compare.html", run1=run1,run2=run2)
+
+
+@login_required
+@app.route('/experiment/<experiment_id>/select_compare', methods=['GET', 'POST'])
+def select_compare(experiment_id):
+    # TODO change this form to wtfform if possible
+    selected_run_ids = request.form.getlist('rowid')
+    u = url_for('compare', experiment_id=experiment_id) + '?run1=' + selected_run_ids[0] + '&run2=' + selected_run_ids[1]
+    return redirect(u)
+
+    
 @login_required
 @app.route('/experiment/<experiment_id>/run/<run_id>', methods=['GET', 'POST'])
 def run(experiment_id,run_id):
@@ -87,10 +107,19 @@ def create_experiment_table(experiment_id):
     return [column_names] + table
 
 
+def clean_columns(columns_csv):
+    cleaned = []
+    for column in columns_csv.split(','):
+        if column != '':
+            key = column.split('=')[0].strip()
+            value = column.split('=')[1].strip()
+            cleaned.append(key+'='+value)
+    return ', '.join(cleaned)
+
+
 @login_required
 @app.route('/experiment/<experiment_id>', methods=['GET', 'POST'])
 def experiment(experiment_id):
-
     experiment = Experiment.query.filter_by(id=experiment_id).first_or_404()
     form = AddRunForm()
     if form.validate_on_submit():
@@ -108,15 +137,16 @@ def experiment(experiment_id):
             if validat_csv(columns) == False:
                 flash('exctracted columns wrongs format: ' + columns)
                 return redirect(url_for('experiment',experiment_id=experiment_id))
-
+            columns = clean_columns(columns)
+            
         if validat_csv(form.columns.data) == False:
             flash('columns wrongs format: ' + form.columns.data)
             return redirect(url_for('experiment',experiment_id=experiment_id))
-
+        
         if columns == '':
-            columns = form.columns.data
+            columns = clean_columns(form.columns.data)
         else:
-            columns = columns + form.columns.data
+            columns = columns + ', ' + clean_columns(form.columns.data)
 
         run = Run(description=form.description.data
                   , run_result=form.run_result.data, owner=current_user

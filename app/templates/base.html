@@ -47,3 +47,24 @@
       {% block app_content %}{% endblock %}
     </div>
 {% endblock %}
+
+    {% block scripts %}
+    {{ super() }}
+    <script>
+
+      var limit = 2;
+      $(".select-run").on('change', function(evt) {
+
+      count = 0
+      $(".select-run").each(function( ) {
+          if(this.checked) {
+              count = count + 1
+          }
+      });
+      if(count > limit) {
+      this.checked = false;
+      }
+      });
+      
+    </script>
+    {% endblock %}

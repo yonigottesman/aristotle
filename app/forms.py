@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField, TextAreaField 
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField, TextAreaField, FieldList
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 from app.models import User
 
@@ -56,3 +56,5 @@ class EditExperimentForm(FlaskForm):
     delete = BooleanField('Delete Experiment')
     column_extract_code = TextAreaField('Parse run output code to colunms', validators=[])
     submit = SubmitField('Update')    
+
+

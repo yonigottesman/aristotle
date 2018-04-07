@@ -5,34 +5,49 @@
 
 
 
-  <div class="row">
-    <div class="col-sm-3">
-      {% include '_experiments.html' %}      
-    </div>
-    
-
-    <div class="col-lg-9">
-      <h1>
-        {{run.description}}
-      </h1>      
-
-      <p>Run Configuration:</p>
-      
-      <pre>
-        {{run.run_result}}
-      </pre>
-
-
-
-    <div class="list-group">
-
-      <li class="list-group-item list-group-item-action ">
-        {{ wtf.quick_form(form,form_type="",horizontal_columns=('sm', 1, 1)) }}
-      </li>
-    </div>
-
-        
-    </div>
+<div class="row">
+  <div class="col-sm-3">
+    {% include '_experiments.html' %}      
   </div>
   
+  
+  <div class="col-lg-9">
+    {% include '_run.html' %}
+    <div class="list-group">
+      <li class="list-group-item list-group-item-action ">
+        <form action="" method="post">
+          {{ form.hidden_tag() }}
+          <div class="form-group {% if form.description.errors %} has-error {% endif %} ">
+            {{form.description.label}}
+            {{form.description(placeholder=run.description, class="form-control") }}
+            {% for error in form.description.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+          </div>
+          
+          <div class="form-group ">
+            {{form.columns.label}}
+            {{form.columns(class="form-control", placeholder="arg1=val1, arg2=val2...")}}
+          </div>
+          
+          <div class="form-group ">
+            {{form.run_result.label}}
+            {{form.run_result(class="form-control",rows="5",placeholder="")}}
+            
+            
+          </div>
+          
+          <div class="form-check ">
+            {{form.delete(class="form-check-input")}}
+            {{form.delete.label(class="form-check-label")}}
+          </div>
+          
+          {{form.submit(class="btn btn-default")}}
+          
+        </form>
+      </li>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
