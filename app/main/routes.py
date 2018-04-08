@@ -4,16 +4,17 @@ from flask_login import current_user, login_user
 from flask_login import logout_user
 from flask_login import login_required
 from app.models import User, Run, Experiment
-from app.forms import AddRunForm, AddExperimentForm, EditExperimentForm, EditRunForm
+from app.main.forms import AddRunForm, AddExperimentForm, EditExperimentForm, EditRunForm
 from app import db
 from flask import request
 from werkzeug.urls import url_parse
 from RestrictedPython import compile_restricted
 from AccessControl.ZopeGuards import get_safe_globals
+from app.main import bp
 
 
 @login_required
-@app.route('/experiment/<experiment_id>/compare', methods=['GET', 'POST'])
+@bp.route('/experiment/<experiment_id>/compare', methods=['GET', 'POST'])
 def compare(experiment_id):
     run1_id = request.args.get('run1')
     run2_id = request.args.get('run2')
@@ -24,20 +25,20 @@ def compare(experiment_id):
 
 
 @login_required
-@app.route('/experiment/<experiment_id>/select_compare', methods=['GET', 'POST'])
+@bp.route('/experiment/<experiment_id>/select_compare', methods=['GET', 'POST'])
 def select_compare(experiment_id):
     # TODO change this form to wtfform if possible
     selected_run_ids = request.form.getlist('rowid')
     if len(selected_run_ids) != 2:
         flash('Select 2 for comparison!')
-        return redirect(url_for('experiment',experiment_id=experiment_id))
+        return redirect(url_for('main.experiment',experiment_id=experiment_id))
     
-    u = url_for('compare', experiment_id=experiment_id) + '?run1=' + selected_run_ids[0] + '&run2=' + selected_run_ids[1]
+    u = url_for('main.compare', experiment_id=experiment_id) + '?run1=' + selected_run_ids[0] + '&run2=' + selected_run_ids[1]
     return redirect(u)
 
     
 @login_required
-@app.route('/experiment/<experiment_id>/run/<run_id>', methods=['GET', 'POST'])
+@bp.route('/experiment/<experiment_id>/run/<run_id>', methods=['GET', 'POST'])
 def run(experiment_id,run_id):
     run = Run.query.filter_by(id=run_id, user_id=current_user.id).first_or_404()
     
@@ -46,21 +47,21 @@ def run(experiment_id,run_id):
         if form.delete.data == True:
             db.session.delete(run)
             db.session.commit()
-            return redirect(url_for('experiment', experiment_id=experiment_id))
+            return redirect(url_for('main.experiment', experiment_id=experiment_id))
         else:
             if form.description.data != '':
                 run.description = form.description.data
             if form.columns.data != '':
                 if validat_csv(form.columns.data) == False:
                     flash('columns wrongs format: ' + form.columns.data)
-                    return redirect(url_for('run',experiment_id=experiment_id,run_id=run_id))
+                    return redirect(url_for('main.run',experiment_id=experiment_id,run_id=run_id))
                 run.columns = form.columns.data
             if form.run_result.data != '':
                 run.run_result = form.run_result.data
                 
             db.session.add(run)
             db.session.commit()
-            return redirect(url_for('experiment', experiment_id=experiment_id))
+            return redirect(url_for('main.experiment', experiment_id=experiment_id))
         
     add_experiment_form = AddExperimentForm()
     experiments = current_user.experiments.all()
@@ -123,7 +124,7 @@ def clean_columns(columns_csv):
 
 
 @login_required
-@app.route('/experiment/<experiment_id>', methods=['GET', 'POST'])
+@bp.route('/experiment/<experiment_id>', methods=['GET', 'POST'])
 def experiment(experiment_id):
     experiment = Experiment.query.filter_by(id=experiment_id).first_or_404()
     form = AddRunForm()
@@ -141,12 +142,12 @@ def experiment(experiment_id):
             
             if validat_csv(columns) == False:
                 flash('exctracted columns wrongs format: ' + columns)
-                return redirect(url_for('experiment',experiment_id=experiment_id))
+                return redirect(url_for('main.experiment',experiment_id=experiment_id))
             columns = clean_columns(columns)
             
         if validat_csv(form.columns.data) == False:
             flash('columns wrongs format: ' + form.columns.data)
-            return redirect(url_for('experiment',experiment_id=experiment_id))
+            return redirect(url_for('main.experiment',experiment_id=experiment_id))
         
         if columns == '':
             columns = clean_columns(form.columns.data)
@@ -161,7 +162,7 @@ def experiment(experiment_id):
         db.session.add(run)
         db.session.commit()
 
-        return redirect(url_for('experiment',experiment_id=experiment_id))
+        return redirect(url_for('main.experiment',experiment_id=experiment_id))
     
     experiments = current_user.experiments.all()
 
@@ -180,8 +181,8 @@ def experiment(experiment_id):
                            , column_range=range(len(columns)))
     
 
-@app.route('/', methods=['GET', 'POST'])
-@app.route('/index', methods=['GET', 'POST'])
+@bp.route('/', methods=['GET', 'POST'])
+@bp.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
 
@@ -194,7 +195,7 @@ def index():
 
 
 @login_required
-@app.route('/add_experiment', methods=['GET', 'POST'])
+@bp.route('/add_experiment', methods=['GET', 'POST'])
 def add_experiment():
     form = AddExperimentForm()
     if form.validate_on_submit():
@@ -203,13 +204,13 @@ def add_experiment():
                                 , columns='')
         db.session.add(experiment)
         db.session.commit()
-        return redirect(url_for('experiment', experiment_id=experiment.id))
+        return redirect(url_for('main.experiment', experiment_id=experiment.id))
     
     #TODO flash an error?
-    return redirect(url_for('index'))    
+    return redirect(url_for('main.index'))    
 
 
-@app.route('/experiment/<experiment_id>/settings', methods=['GET', 'POST'])
+@bp.route('/experiment/<experiment_id>/settings', methods=['GET', 'POST'])
 @login_required
 def experiment_settings(experiment_id):
 
@@ -219,7 +220,7 @@ def experiment_settings(experiment_id):
         if form.delete.data == True:
             db.session.delete(experiment)
             db.session.commit()
-            return redirect(url_for('index'))        
+            return redirect(url_for('main.index'))        
         else:
             if form.description.data != '':
                 experiment.description = form.description.data
@@ -230,7 +231,7 @@ def experiment_settings(experiment_id):
                 
             db.session.add(experiment)
             db.session.commit()
-            return redirect(url_for('experiment', experiment_id=experiment_id))        
+            return redirect(url_for('main.experiment', experiment_id=experiment_id))        
 
     experiments = current_user.experiments.all()
     add_experiment_form = AddExperimentForm()
