@@ -3,12 +3,33 @@
 
 {% block app_content %}
 
+<style>
+pre.compare-pre {
+    height: auto;
+    max-height: 750px;
+    overflow: auto;
+    background-color: #eeeeee;
+    word-break: normal !important;
+    word-wrap: normal !important;
+    white-space: pre !important;
+}
+
+a.compare-columns {
+    height: auto;
+    max-height: 200px;
+    min-height: 200px;
+    overflow: auto;
+}
+
+</style>
+
+
 <div class="row">
   <div class="col-lg-6">
     <h1>{{run1.description}}</h1>      
     
     <div class="list-group">
-      <a  class="list-group-item list-group-item-action flex-column align-items-start">
+      <a  class="compare-columns list-group-item list-group-item-action flex-column align-items-start">
         <div class="d-flex w-100 justify-content-between ">
           <h5 class="mb-1">columns:</h5>
         </div>
@@ -16,7 +37,7 @@
       </a>
     </div>
     
-    <pre>
+    <pre class="compare-pre">
       {{run1.run_result}}
     </pre>
 
@@ -27,7 +48,7 @@
     <h1>{{run2.description}}</h1>      
     
     <div class="list-group">
-      <a  class="list-group-item list-group-item-action flex-column align-items-start">
+      <a  class="compare-columns list-group-item list-group-item-action flex-column align-items-start">
         <div class="d-flex w-100 justify-content-between ">
           <h5 class="mb-1">columns:</h5>
         </div>
@@ -35,7 +56,7 @@
       </a>
     </div>
     
-    <pre>
+    <pre class="compare-pre">
       {{run2.run_result}}
     </pre>
 

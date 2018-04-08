@@ -32,7 +32,7 @@
         {% if experiment.column_extract_code == None%}
         {{form.column_extract_code(class="form-control",rows="10",default="xxx",placeholder="def parse(run_output)\n    return csv_string #'key1=val1,key2=val2...'")}}
         {% else %}
-        {{form.column_extract_code(class="form-control",rows="10",default="xxx",placeholder=experiment.column_extract_code)}}
+        {{form.column_extract_code(class="form-control",rows="10",placeholder=experiment.column_extract_code)}}
         {% endif %}
 
       </div>

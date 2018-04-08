@@ -1,11 +1,10 @@
 from app import app
 from flask import render_template, flash, redirect, url_for
-from app.forms import LoginForm
 from flask_login import current_user, login_user
 from flask_login import logout_user
 from flask_login import login_required
 from app.models import User, Run, Experiment
-from app.forms import RegistrationForm, AddRunForm, AddExperimentForm, EditExperimentForm, EditRunForm
+from app.forms import AddRunForm, AddExperimentForm, EditExperimentForm, EditRunForm
 from app import db
 from flask import request
 from werkzeug.urls import url_parse
@@ -29,6 +28,10 @@ def compare(experiment_id):
 def select_compare(experiment_id):
     # TODO change this form to wtfform if possible
     selected_run_ids = request.form.getlist('rowid')
+    if len(selected_run_ids) != 2:
+        flash('Select 2 for comparison!')
+        return redirect(url_for('experiment',experiment_id=experiment_id))
+    
     u = url_for('compare', experiment_id=experiment_id) + '?run1=' + selected_run_ids[0] + '&run2=' + selected_run_ids[1]
     return redirect(u)
 
@@ -83,11 +86,13 @@ def create_experiment_table(experiment_id):
     runs = current_user.runs.filter(Run.experiment_id==int(experiment_id))
     column_names = []
     run_columns_dict = {}
+
     for run in runs:
+        print(run.columns.split(','),flush=True)
         columns_raw = run.columns.split(',')
         column_dict = {}
         for column_raw in columns_raw:
-            if column_raw != '':
+            if column_raw.strip() != '':
                 name = column_raw.split('=')[0].strip()
                 value = column_raw.split('=')[1].strip()
                 if name not in column_names:
@@ -110,7 +115,7 @@ def create_experiment_table(experiment_id):
 def clean_columns(columns_csv):
     cleaned = []
     for column in columns_csv.split(','):
-        if column != '':
+        if column.strip() != '':
             key = column.split('=')[0].strip()
             value = column.split('=')[1].strip()
             cleaned.append(key+'='+value)
@@ -188,47 +193,6 @@ def index():
                            , experiments=experiments)
 
 
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
-            return redirect(url_for('login'))
-        login_user(user, remember=form.remember_me.data)
-        next_page = request.args.get('next')
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('index')
-        return redirect(next_page)
-    
-    return render_template('login.html', title='Sign In', form=form)
-
-
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('Congratulations, you are now a registered user!')
-        return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
-
-
 @login_required
 @app.route('/add_experiment', methods=['GET', 'POST'])
 def add_experiment():
@@ -267,14 +231,17 @@ def experiment_settings(experiment_id):
             db.session.add(experiment)
             db.session.commit()
             return redirect(url_for('experiment', experiment_id=experiment_id))        
-    else:
-        experiments = current_user.experiments.all()
-        add_experiment_form = AddExperimentForm()        
 
-        return render_template("experiment_settings.html", title='Settings', form=form
-                               , experiments=experiments
-                               , add_experiment_form=add_experiment_form
-                               , experiment_id=int(experiment_id)
-                               ,experiment=experiment)
+    experiments = current_user.experiments.all()
+    add_experiment_form = AddExperimentForm()
+    if experiment.column_extract_code is None or experiment.column_extract_code == '':
+        form.column_extract_code.data = """def parse(run_output)\n    csv_string = '' #'key1=val1,key2=val2...'\n    return csv_string"""
+    else:
+        form.column_extract_code.data = experiment.column_extract_code
+    return render_template("experiment_settings.html", title='Settings', form=form
+                           , experiments=experiments
+                           , add_experiment_form=add_experiment_form
+                           , experiment_id=int(experiment_id)
+                           ,experiment=experiment)
 
     
