@@ -1,12 +1,8 @@
-from app import app
-from flask import render_template, flash, redirect, url_for
-from flask_login import current_user, login_user
-from flask_login import logout_user
-from flask_login import login_required
+from flask import render_template, flash, redirect, url_for, request
+from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Run, Experiment
 from app.main.forms import AddRunForm, AddExperimentForm, EditExperimentForm, EditRunForm
 from app import db
-from flask import request
 from werkzeug.urls import url_parse
 from RestrictedPython import compile_restricted
 from AccessControl.ZopeGuards import get_safe_globals
