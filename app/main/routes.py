@@ -85,7 +85,6 @@ def create_experiment_table(experiment_id):
     run_columns_dict = {}
 
     for run in runs:
-        print(run.columns.split(','),flush=True)
         columns_raw = run.columns.split(',')
         column_dict = {}
         for column_raw in columns_raw:
