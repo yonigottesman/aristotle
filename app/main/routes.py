@@ -16,8 +16,15 @@ def compare(experiment_id):
     run2_id = request.args.get('run2')
     run1 = Run.query.filter_by(id=run1_id, user_id=current_user.id).first_or_404()
     run2 = Run.query.filter_by(id=run2_id, user_id=current_user.id).first_or_404()
+
+    t = create_experiment_table([run1, run2])
+    table = t[1:]
+    columns = t[0]
     
-    return render_template("compare.html", run1=run1,run2=run2)
+    return render_template("compare.html", run1=run1,run2=run2
+                           , columns=columns
+                           , table=table
+                           , column_range=range(len(columns)))
 
 
 @login_required
@@ -79,8 +86,7 @@ def validat_csv(line):
     return True
 
 
-def create_experiment_table(experiment_id):
-    runs = current_user.runs.filter(Run.experiment_id==int(experiment_id))
+def create_experiment_table(runs):
     column_names = []
     run_columns_dict = {}
 
@@ -103,7 +109,7 @@ def create_experiment_table(experiment_id):
         defaults = dict([(name, '-') for name in column_names])
         defaults.update(run_columns_dict[run])
         run_columns_dict[run] = defaults
-        table.append({'run_id':run.id, 'columns':list(defaults.values())})
+        table.append({'run':run, 'columns':list(defaults.values())})
 
     return [column_names] + table
 
@@ -160,8 +166,7 @@ def experiment(experiment_id):
         return redirect(url_for('main.experiment',experiment_id=experiment_id))
     
     experiments = current_user.experiments.all()
-
-    t = create_experiment_table(experiment_id)
+    t = create_experiment_table(current_user.runs.filter(Run.experiment_id==int(experiment_id)))
     table = t[1:]
     columns = t[0]
         

@@ -23,20 +23,35 @@ a.compare-columns {
 
 </style>
 
+<div class="row">
+      <!-- table -->
+
+      <div class="row table-responsive text-nowrap ">
+        <table class="table table-hover table-striped table-bordered table-hover model-list">
+          <thead class="thead-dark">
+            <tr>
+              {% for i in column_range %}
+              <th scope="col">{{columns[i]}}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table %}
+            <tr>
+              {% for i in column_range %}
+              <td>{{row['columns'][i]}}</td>          
+              {% endfor %}
+            </tr>        
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+</div>
+
 
 <div class="row">
   <div class="col-lg-6">
     <h1>{{run1.description}}</h1>      
-    
-    <div class="list-group">
-      <a  class="compare-columns list-group-item list-group-item-action flex-column align-items-start">
-        <div class="d-flex w-100 justify-content-between ">
-          <h5 class="mb-1">columns:</h5>
-        </div>
-        <p class="mb-1">{{run1.columns}}</p>
-      </a>
-    </div>
-    
     <pre class="compare-pre">
       {{run1.run_result}}
     </pre>
@@ -46,16 +61,6 @@ a.compare-columns {
   </div>
   <div class="col-lg-6">
     <h1>{{run2.description}}</h1>      
-    
-    <div class="list-group">
-      <a  class="compare-columns list-group-item list-group-item-action flex-column align-items-start">
-        <div class="d-flex w-100 justify-content-between ">
-          <h5 class="mb-1">columns:</h5>
-        </div>
-        <p class="mb-1">{{run2.columns}}</p>
-      </a>
-    </div>
-    
     <pre class="compare-pre">
       {{run2.run_result}}
     </pre>

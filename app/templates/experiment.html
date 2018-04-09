@@ -34,10 +34,10 @@
           <tbody>
             {% for row in table %}
             <tr>
-              <td> <input type="checkbox" name="rowid" class="action-checkbox select-run" value={{row['run_id']}} title="Select record"></td>
-              <td><a href="{{ url_for('main.run',experiment_id=experiment_id,run_id=row['run_id']) }}">view</a></td>          
+              <td > <input type="checkbox" name="rowid" class="action-checkbox select-run" value={{row['run'].id}} title="Select record"></td>
+              <td><a data-toggle="tooltip" data-placement="left" title="{{row['run'].description}}" href="{{ url_for('main.run',experiment_id=experiment_id,run_id=row['run_id']) }}">view</a></td>          
               {% for i in column_range %}
-              <td>{{row['columns'][i]}}</td>          
+              <td >{{row['columns'][i]}}</td>          
               {% endfor %}
             </tr>        
             {% endfor %}
@@ -46,7 +46,7 @@
       </div>
       <button type="submit" class="btn btn-primary">Compare</button>
     </form>
-    
+
     <br>
 
     <div class="list-group">
