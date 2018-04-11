@@ -124,31 +124,57 @@ def clean_columns(columns_csv):
     return ', '.join(cleaned)
 
 
+def render_experiment(experiment, add_run_form):
+    experiments = current_user.experiments.all()
+    t = create_experiment_table(current_user.runs.filter(Run.experiment_id==experiment.id))
+    table = t[1:]
+    columns = t[0]
+        
+    add_experiment_form = AddExperimentForm()
+
+    return render_template("experiment.html", title='Experiment', add_run_form=add_run_form
+                           , add_experiment_form=add_experiment_form
+                           , experiments=experiments
+                           , experiment_id=experiment.id
+                           , columns=columns
+                           , table=table
+                           , column_range=range(len(columns)))
+    
+
 @login_required
 @bp.route('/experiment/<experiment_id>', methods=['GET', 'POST'])
 def experiment(experiment_id):
     experiment = Experiment.query.filter_by(id=experiment_id).first_or_404()
     form = AddRunForm()
+
     if form.validate_on_submit():
         columns = ''
         if experiment.column_extract_code is not None:
             # TODO This part should be done once when code is submitted.
             source_code = experiment.column_extract_code
-            byte_code = compile_restricted(source_code, filename='<inline code>', mode='exec')
-            loc = {}
-            exec(byte_code,get_safe_globals(),loc)
-            columns = loc['parse'](form.run_result.data)
-            if columns is None:
-                columns = ''
+            try:
+                byte_code = compile_restricted(source_code, filename='<inline code>', mode='exec')
+                loc = {}
+                exec(byte_code,get_safe_globals(),loc)
+
+
+                columns = loc['parse'](form.run_result.data)
+                if columns is None:
+                    columns = ''
             
-            if validat_csv(columns) == False:
-                flash('exctracted columns wrongs format: ' + columns)
-                return redirect(url_for('main.experiment',experiment_id=experiment_id))
+                if validat_csv(columns) == False:
+                    form.run_result.errors.append('exctracted columns wrongs format: ' + columns)
+                    return render_experiment(experiment, form)
+            
+            except Exception as e:
+                form.run_result.errors.append('Error while parsing:' + str(e))
+                return render_experiment(experiment, form)
+            
             columns = clean_columns(columns)
-            
         if validat_csv(form.columns.data) == False:
-            flash('columns wrongs format: ' + form.columns.data)
-            return redirect(url_for('main.experiment',experiment_id=experiment_id))
+            form.columns.errors.append('columns wrongs format')
+            return render_experiment(experiment, form)
+
         
         if columns == '':
             columns = clean_columns(form.columns.data)
@@ -165,21 +191,7 @@ def experiment(experiment_id):
 
         return redirect(url_for('main.experiment',experiment_id=experiment_id))
     
-    experiments = current_user.experiments.all()
-    t = create_experiment_table(current_user.runs.filter(Run.experiment_id==int(experiment_id)))
-    table = t[1:]
-    columns = t[0]
-        
-    add_experiment_form = AddExperimentForm()
-
-    return render_template("experiment.html", title='Experiment', form=form
-                           , add_experiment_form=add_experiment_form
-                           , experiments=experiments
-                           , experiment_id=int(experiment_id)
-                           , columns=columns
-                           , table=table
-                           , column_range=range(len(columns)))
-    
+    return render_experiment(experiment, form)
 
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
@@ -210,6 +222,22 @@ def add_experiment():
     return redirect(url_for('main.index'))    
 
 
+def render_settings(experiment, form, compilation_error=None):
+    experiments = current_user.experiments.all()
+    add_experiment_form = AddExperimentForm()
+    if experiment.column_extract_code is None or experiment.column_extract_code == '':
+        form.column_extract_code.data = """def parse(run_output):\n    csv_string = '' #'key1=val1,key2=val2...'\n    return csv_string"""
+    else:
+        form.column_extract_code.data = experiment.column_extract_code
+    return render_template("experiment_settings.html", title='Settings', form=form
+                           , experiments=experiments
+                           , add_experiment_form=add_experiment_form
+                           , experiment_id=experiment.id
+                           , experiment=experiment
+                           , compilation_error=compilation_error)
+    
+
+
 @bp.route('/experiment/<experiment_id>/settings', methods=['GET', 'POST'])
 @login_required
 def experiment_settings(experiment_id):
@@ -228,21 +256,16 @@ def experiment_settings(experiment_id):
                 experiment.columns = form.columns.data
             if form.column_extract_code.data != '':
                 experiment.column_extract_code = form.column_extract_code.data
-                
+                try:
+                    byte_code = compile_restricted(experiment.column_extract_code, filename='<inline code>', mode='exec')
+                    loc = {}
+                    exec(byte_code,get_safe_globals(),loc)
+                except SyntaxError as e:
+                    return render_settings(experiment, form, e)
+
             db.session.add(experiment)
             db.session.commit()
             return redirect(url_for('main.experiment', experiment_id=experiment_id))        
 
-    experiments = current_user.experiments.all()
-    add_experiment_form = AddExperimentForm()
-    if experiment.column_extract_code is None or experiment.column_extract_code == '':
-        form.column_extract_code.data = """def parse(run_output)\n    csv_string = '' #'key1=val1,key2=val2...'\n    return csv_string"""
-    else:
-        form.column_extract_code.data = experiment.column_extract_code
-    return render_template("experiment_settings.html", title='Settings', form=form
-                           , experiments=experiments
-                           , add_experiment_form=add_experiment_form
-                           , experiment_id=int(experiment_id)
-                           ,experiment=experiment)
-
+    return render_settings(experiment, form)
     

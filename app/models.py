@@ -44,10 +44,19 @@ class Run(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     experiment_id = db.Column(db.Integer, db.ForeignKey('experiment.id'))
     columns = db.Column(db.String(400))
+    files = db.relationship('FileContent', backref='run', lazy='dynamic'
+                            , cascade='delete')
+
     
     def __repr__(self):
         return '<Run {}>'.format(self.description)    
 
+    
+class FileContent(db.Model):
+    id = db.Column(db.Integer, primary_key=True) 
+    run_id = db.Column(db.Integer, db.ForeignKey('run.id'))
+    data = db.Column(db.LargeBinary)
+    
 
 @login.user_loader
 def load_user(id):
