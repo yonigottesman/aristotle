@@ -52,37 +52,7 @@
     <div class="list-group">
       
       <li class="list-group-item list-group-item-action ">
-        <form action="" method="post">
-          {{ add_run_form.hidden_tag() }}
-          <div class="form-group {% if add_run_form.description.errors %} has-error {% endif %} ">
-            {{add_run_form.description.label}}
-            {{add_run_form.description(placeholder="Description of run", class="form-control") }}
-            {% for error in add_run_form.description.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-          </div>
-          
-          <div class="form-group {% if add_run_form.columns.errors %} has-error {% endif %}">
-            {{add_run_form.columns.label}}
-            {{add_run_form.columns(class="form-control", placeholder="arg1=val1, arg2=val2...")}}
-            {% if add_run_form.columns.errors %}
-            {% for error in add_run_form.columns.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-            {% endif %}
-          </div>
-          
-          <div class="form-group {% if add_run_form.run_result.errors %} has-error {% endif %}">
-            {{add_run_form.run_result.label}}
-            {{add_run_form.run_result(class="form-control",rows="5",placeholder="")}}
-            {% if add_run_form.run_result.errors %}
-            {% for error in add_run_form.run_result.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-            {% endif %}
-          </div>
-          {{add_run_form.submit(class="btn btn-default")}}
-        </form>
+        {% include '_runform.html' %}              
       </li>
     </div>
     

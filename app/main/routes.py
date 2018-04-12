@@ -1,13 +1,15 @@
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User, Run, Experiment
+from app.models import User, Run, Experiment, FileContent
 from app.main.forms import AddRunForm, AddExperimentForm, EditExperimentForm, EditRunForm
-from app import db
+from app import db, images
 from werkzeug.urls import url_parse
 from RestrictedPython import compile_restricted
 from AccessControl.ZopeGuards import get_safe_globals
 from app.main import bp
-
+from flask import current_app as app
+from werkzeug.utils import secure_filename
+import os
 
 @login_required
 @bp.route('/experiment/<experiment_id>/compare', methods=['GET', 'POST'])
@@ -39,6 +41,10 @@ def select_compare(experiment_id):
     u = url_for('main.compare', experiment_id=experiment_id) + '?run1=' + selected_run_ids[0] + '&run2=' + selected_run_ids[1]
     return redirect(u)
 
+
+def validate_run_form(run, form):
+    
+
     
 @login_required
 @bp.route('/experiment/<experiment_id>/run/<run_id>', methods=['GET', 'POST'])
@@ -61,20 +67,31 @@ def run(experiment_id,run_id):
                 run.columns = form.columns.data
             if form.run_result.data != '':
                 run.run_result = form.run_result.data
-                
+
+            if form.upload_file.data is not None:
+                f = form.upload_file.data
+                fn = images.save(f,run_id)
+                new_file = FileContent(run_id=run.id, file_name=fn)
+
+                db.session.add(new_file)
+
             db.session.add(run)
             db.session.commit()
-            return redirect(url_for('main.experiment', experiment_id=experiment_id))
+            return redirect(url_for('main.run', experiment_id=experiment_id, run_id=run_id))
         
     add_experiment_form = AddExperimentForm()
     experiments = current_user.experiments.all()
 
     run = Run.query.get(run_id)
+    run_images = run.files.all()
 
-    return render_template("run.html", title='Run', form=form
+    return render_template("run.html", title='Run'
                            , add_experiment_form=add_experiment_form
                            , experiments=experiments
-                           , run=run)    
+                           , add_run_form=form
+                           , run=run
+                           , images=run_images)
+
 
 def validat_csv(line):
     if line is None:
@@ -150,14 +167,14 @@ def experiment(experiment_id):
     if form.validate_on_submit():
         columns = ''
         if experiment.column_extract_code is not None:
+            # extract columns from output
             # TODO This part should be done once when code is submitted.
             source_code = experiment.column_extract_code
             try:
                 byte_code = compile_restricted(source_code, filename='<inline code>', mode='exec')
                 loc = {}
                 exec(byte_code,get_safe_globals(),loc)
-
-
+                
                 columns = loc['parse'](form.run_result.data)
                 if columns is None:
                     columns = ''
@@ -171,6 +188,7 @@ def experiment(experiment_id):
                 return render_experiment(experiment, form)
             
             columns = clean_columns(columns)
+            
         if validat_csv(form.columns.data) == False:
             form.columns.errors.append('columns wrongs format')
             return render_experiment(experiment, form)

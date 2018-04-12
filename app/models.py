@@ -1,4 +1,4 @@
-from app import db
+from app import db, images
 from flask_login import UserMixin
 from app import login
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -55,9 +55,12 @@ class Run(db.Model):
 class FileContent(db.Model):
     id = db.Column(db.Integer, primary_key=True) 
     run_id = db.Column(db.Integer, db.ForeignKey('run.id'))
-    data = db.Column(db.LargeBinary)
-    
+    file_name = db.Column(db.String(50))
 
+    @property
+    def imgsrc(self):
+        return images.url(self.file_name)
+    
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))

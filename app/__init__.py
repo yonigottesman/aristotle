@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
-
+from flask_uploads import UploadSet, configure_uploads, IMAGES
 
 
 db = SQLAlchemy()
@@ -13,6 +13,7 @@ login = LoginManager()
 login.login_view = 'auth.login'
 bootstrap = Bootstrap()
 
+images = UploadSet('images', IMAGES)
 
 
 def create_app(config_class=Config):
@@ -24,6 +25,8 @@ def create_app(config_class=Config):
     login.init_app(app)
     bootstrap.init_app(app)
 
+    configure_uploads(app, (images,))
+    
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
 
