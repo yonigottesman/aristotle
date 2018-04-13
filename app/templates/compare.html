@@ -3,26 +3,6 @@
 
 {% block app_content %}
 
-<style>
-pre.compare-pre {
-    height: auto;
-    max-height: 750px;
-    overflow: auto;
-    background-color: #eeeeee;
-    word-break: normal !important;
-    word-wrap: normal !important;
-    white-space: pre !important;
-}
-
-a.compare-columns {
-    height: auto;
-    max-height: 200px;
-    min-height: 200px;
-    overflow: auto;
-}
-
-</style>
-
 <div class="row">
       <!-- table -->
 
@@ -50,24 +30,32 @@ a.compare-columns {
 
 
 <div class="row">
+  
   <div class="col-lg-6">
     <h1>{{run1.description}}</h1>      
-    <pre class="compare-pre">
+    <pre class="result-pre">
       {{run1.run_result}}
     </pre>
 
-
+    {% for image in run1_images%}
+    <img src="{{ image.imgsrc }}" class="img-responsive" alt="image"  >
+    {% endfor %}
     
   </div>
+  
   <div class="col-lg-6">
     <h1>{{run2.description}}</h1>      
-    <pre class="compare-pre">
+    <pre class="result-pre">
       {{run2.run_result}}
     </pre>
 
-
+    {% for image in run2_images%}
+    <img src="{{ image.imgsrc }}" class="img-responsive" alt="image" >
+    {% endfor %}
     
   </div>
+
+  
 </div>
 
 {% endblock %}

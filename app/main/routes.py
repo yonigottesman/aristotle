@@ -19,6 +19,9 @@ def compare(experiment_id):
     run1 = Run.query.filter_by(id=run1_id, user_id=current_user.id).first_or_404()
     run2 = Run.query.filter_by(id=run2_id, user_id=current_user.id).first_or_404()
 
+    run1_images = run1.files.all()
+    run2_images = run2.files.all()
+    
     t = create_experiment_table([run1, run2])
     table = t[1:]
     columns = t[0]
@@ -26,6 +29,8 @@ def compare(experiment_id):
     return render_template("compare.html", run1=run1,run2=run2
                            , columns=columns
                            , table=table
+                           , run1_images=run1_images
+                           , run2_images=run2_images
                            , column_range=range(len(columns)))
 
 
@@ -42,14 +47,25 @@ def select_compare(experiment_id):
     return redirect(u)
 
 
-def validate_run_form(run, form):
+def render_run(run, form):
     
+    add_experiment_form = AddExperimentForm()
+    experiments = current_user.experiments.all()
+    run_images = run.files.all()
 
+    return render_template("run.html", title='Run'
+                           , add_experiment_form=add_experiment_form
+                           , experiments=experiments
+                           , add_run_form=form
+                           , run=run
+                           , images=run_images)    
+    
     
 @login_required
 @bp.route('/experiment/<experiment_id>/run/<run_id>', methods=['GET', 'POST'])
 def run(experiment_id,run_id):
     run = Run.query.filter_by(id=run_id, user_id=current_user.id).first_or_404()
+    experiment = Experiment.query.filter_by(id=experiment_id).first_or_404()
     
     form = EditRunForm()
     if form.validate_on_submit():
@@ -58,39 +74,56 @@ def run(experiment_id,run_id):
             db.session.commit()
             return redirect(url_for('main.experiment', experiment_id=experiment_id))
         else:
+            
+            columns = ''
+            if experiment.column_extract_code is not None:
+                # extract columns from output
+                # TODO This part should be done once when code is submitted.
+                source_code = experiment.column_extract_code
+                try:
+                    byte_code = compile_restricted(source_code, filename='<inline code>', mode='exec')
+                    loc = {}
+                    exec(byte_code,get_safe_globals(),loc)
+                
+                    columns = loc['parse'](form.run_result.data)
+                    if columns is None:
+                        columns = ''
+            
+                    if validat_csv(columns) == False:
+                        form.run_result.errors.append('exctracted columns wrongs format: ' + columns)
+                        return render_experiment(experiment, form)
+            
+                except Exception as e:
+                    form.run_result.errors.append('Error while parsing:' + str(e))
+                    return render_run(run, form)
+            
+                columns = clean_columns(columns)
+
+            if validat_csv(form.columns.data) == False:
+                form.columns.errors.append('columns wrongs format')
+                return render_run(run, form)
+
+
+            if form.columns.data != '' or columns != '':
+                if columns == '' :
+                    run.columns = clean_columns(form.columns.data)
+                else:
+                    run.columns = columns + ', ' + clean_columns(form.columns.data)
+
             if form.description.data != '':
                 run.description = form.description.data
-            if form.columns.data != '':
-                if validat_csv(form.columns.data) == False:
-                    flash('columns wrongs format: ' + form.columns.data)
-                    return redirect(url_for('main.run',experiment_id=experiment_id,run_id=run_id))
-                run.columns = form.columns.data
-            if form.run_result.data != '':
-                run.run_result = form.run_result.data
-
+                
             if form.upload_file.data is not None:
                 f = form.upload_file.data
                 fn = images.save(f,run_id)
                 new_file = FileContent(run_id=run.id, file_name=fn)
-
                 db.session.add(new_file)
 
             db.session.add(run)
             db.session.commit()
             return redirect(url_for('main.run', experiment_id=experiment_id, run_id=run_id))
         
-    add_experiment_form = AddExperimentForm()
-    experiments = current_user.experiments.all()
-
-    run = Run.query.get(run_id)
-    run_images = run.files.all()
-
-    return render_template("run.html", title='Run'
-                           , add_experiment_form=add_experiment_form
-                           , experiments=experiments
-                           , add_run_form=form
-                           , run=run
-                           , images=run_images)
+    return render_run(run, form)
 
 
 def validat_csv(line):

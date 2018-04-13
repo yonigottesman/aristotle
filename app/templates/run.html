@@ -22,11 +22,16 @@
     </div>
 
 
-  {% for image in images%}
-  <img src="{{ image.imgsrc }}" alt="image" width="500" height="500">
-  {% endfor %}
+
     
   </div>
+</div>
+
+
+<div class="row">
+    {% for image in images%}
+    <img src="{{ image.imgsrc }}" class="img-responsive" alt="image">
+    {% endfor %}
 </div>
 
 {% endblock %}
