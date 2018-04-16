@@ -38,7 +38,9 @@
     </pre>
 
     {% for image in run1_images%}
-    <img src="{{ image.imgsrc }}" class="img-responsive" alt="image"  >
+    <a href="{{ image.imgsrc }}">
+      <img  src="{{ image.imgsrc }}" class="img-responsive" alt="image"  >
+    </a>
     {% endfor %}
     
   </div>
@@ -50,7 +52,10 @@
     </pre>
 
     {% for image in run2_images%}
-    <img src="{{ image.imgsrc }}" class="img-responsive" alt="image" >
+    <a href="{{ image.imgsrc }}">
+      <img  src="{{ image.imgsrc }}" class="img-responsive" alt="image" >
+    </a>
+
     {% endfor %}
     
   </div>

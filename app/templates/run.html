@@ -29,8 +29,11 @@
 
 
 <div class="row">
-    {% for image in images%}
+  {% for image in images%}
+  <a href="{{ image.imgsrc }}">
     <img src="{{ image.imgsrc }}" class="img-responsive" alt="image">
+  </a>
+
     {% endfor %}
 </div>
 

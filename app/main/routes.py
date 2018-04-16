@@ -236,9 +236,15 @@ def experiment(experiment_id):
                   , run_result=form.run_result.data, owner=current_user
                   , columns=columns
                   , experiment_id=int(experiment_id))
-            
         db.session.add(run)
         db.session.commit()
+        
+        if form.upload_file.data is not None:
+            f = form.upload_file.data
+            fn = images.save(f,str(run.id))
+            new_file = FileContent(run_id=run.id, file_name=fn)
+            db.session.add(new_file)
+            db.session.commit()
 
         return redirect(url_for('main.experiment',experiment_id=experiment_id))
     
