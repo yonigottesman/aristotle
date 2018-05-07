@@ -52,7 +52,6 @@ def render_run(run, form):
     add_experiment_form = AddExperimentForm()
     experiments = current_user.experiments.all()
     run_images = run.files.all()
-    form.run_result.data = run.run_result
     return render_template("run.html", title='Run'
                            , add_experiment_form=add_experiment_form
                            , experiments=experiments
@@ -77,7 +76,7 @@ def run(experiment_id,run_id):
         else:
             
             columns = ''
-            if experiment.column_extract_code is not None:
+            if experiment.column_extract_code is not None and form.run_result.data != '':
                 # extract columns from output
                 # TODO This part should be done once when code is submitted.
                 source_code = experiment.column_extract_code
@@ -99,7 +98,8 @@ def run(experiment_id,run_id):
                     return render_run(run, form)
             
                 columns = clean_columns(columns)
-
+                run.result_inffered_columns = columns
+                
             if form.run_result.data != '':
                 run.run_result = form.run_result.data
                 
@@ -107,11 +107,8 @@ def run(experiment_id,run_id):
                 form.columns.errors.append('columns wrongs format')
                 return render_run(run, form)
 
-            if form.columns.data != '' or columns != '':
-                if columns == '' :
-                    run.columns = clean_columns(form.columns.data)
-                else:
-                    run.columns = columns + ', ' + clean_columns(form.columns.data)
+            if clean_columns(form.columns.data) != '':
+                run.columns = clean_columns(form.columns.data)
 
             if form.description.data != '':
                 run.description = form.description.data
@@ -144,7 +141,8 @@ def create_experiment_table(runs):
     run_columns_dict = {}
 
     for run in runs:
-        columns_raw = run.columns.split(',')
+        
+        columns_raw = run.columns.split(',') + run.result_inffered_columns.split(',')
         column_dict = {}
         for column_raw in columns_raw:
             if column_raw.strip() != '':
@@ -179,10 +177,11 @@ def clean_columns(columns_csv):
 
 def render_experiment(experiment, add_run_form):
     experiments = current_user.experiments.all()
-    t = create_experiment_table(current_user.runs.filter(Run.experiment_id==experiment.id))
+    runs = current_user.runs.filter(Run.experiment_id==experiment.id)
+    t = create_experiment_table(runs)
     table = t[1:]
     columns = t[0]
-        
+    add_run_form.columns.data = runs[-1].columns+','
     add_experiment_form = AddExperimentForm()
 
     return render_template("experiment.html", title='Experiment', add_run_form=add_run_form
@@ -230,14 +229,15 @@ def experiment(experiment_id):
             return render_experiment(experiment, form)
 
         
-        if columns == '':
-            columns = clean_columns(form.columns.data)
-        else:
-            columns = columns + ', ' + clean_columns(form.columns.data)
+        # if columns == '':
+        #     columns = clean_columns(form.columns.data)
+        # else:
+        #     columns = columns + ', ' + clean_columns(form.columns.data)
 
         run = Run(description=form.description.data
                   , run_result=form.run_result.data, owner=current_user
-                  , columns=columns
+                  , result_inffered_columns=columns
+                  , columns = clean_columns(form.columns.data)
                   , experiment_id=int(experiment_id))
         db.session.add(run)
         db.session.commit()

@@ -9,8 +9,8 @@ from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 class AddRunForm(FlaskForm):
     columns = StringField('Columns - CSV String', validators=[])
-    description = StringField('Description', validators=[DataRequired()])
-    run_result = TextAreaField('Run Output', validators=[ DataRequired()])
+    description = StringField('Description', validators=[])
+    run_result = TextAreaField('Run Output', validators=[])
     upload_file = FileField('upload_file', validators=[FileAllowed(images, 'Images only!') ])
     submit = SubmitField('Add')
 

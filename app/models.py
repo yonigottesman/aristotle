@@ -44,6 +44,7 @@ class Run(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     experiment_id = db.Column(db.Integer, db.ForeignKey('experiment.id'))
     columns = db.Column(db.String(400))
+    result_inffered_columns = db.Column(db.String(4000))
     files = db.relationship('FileContent', backref='run', lazy='dynamic'
                             , cascade='delete')
 

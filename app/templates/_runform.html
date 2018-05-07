@@ -34,6 +34,15 @@
   <span style="color: red;">[{{ error }}]</span>
   {% endfor %}
 
+  {% if add_run_form['delete'] %}
+  <br>
+  <div class="form-check">
+  {{add_run_form.delete}}
+    {{add_run_form.delete.label}}
+
+  </div>  
+  {% endif %}
+  
   <br>
   {{add_run_form.submit(class="btn btn-default")}}
 </form>
