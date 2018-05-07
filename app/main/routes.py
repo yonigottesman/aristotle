@@ -141,8 +141,12 @@ def create_experiment_table(runs):
     run_columns_dict = {}
 
     for run in runs:
-        
-        columns_raw = run.columns.split(',') + run.result_inffered_columns.split(',')
+        columns_raw = []
+        if run.columns is not None:
+            columns_raw = run.columns.split(',') 
+        if run.result_inffered_columns is not None:
+            columns_raw = columns_raw + run.result_inffered_columns.split(',')
+            
         column_dict = {}
         for column_raw in columns_raw:
             if column_raw.strip() != '':
