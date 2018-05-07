@@ -20,7 +20,7 @@
   
   <div class="form-group {% if add_run_form.run_result.errors %} has-error {% endif %}">
     {{add_run_form.run_result.label}}
-    {{add_run_form.run_result(class="form-control",rows="5",placeholder="")}}
+    {{add_run_form.run_result(class="form-control",rows="5")}}
     {% if add_run_form.run_result.errors %}
     {% for error in add_run_form.run_result.errors %}
     <span style="color: red;">[{{ error }}]</span>

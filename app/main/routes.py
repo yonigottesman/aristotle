@@ -52,7 +52,7 @@ def render_run(run, form):
     add_experiment_form = AddExperimentForm()
     experiments = current_user.experiments.all()
     run_images = run.files.all()
-
+    form.run_result.data = run.run_result
     return render_template("run.html", title='Run'
                            , add_experiment_form=add_experiment_form
                            , experiments=experiments
@@ -68,6 +68,7 @@ def run(experiment_id,run_id):
     experiment = Experiment.query.filter_by(id=experiment_id).first_or_404()
     
     form = EditRunForm()
+
     if form.validate_on_submit():
         if form.delete.data == True:
             db.session.delete(run)
@@ -99,10 +100,12 @@ def run(experiment_id,run_id):
             
                 columns = clean_columns(columns)
 
+            if form.run_result.data != '':
+                run.run_result = form.run_result.data
+                
             if validat_csv(form.columns.data) == False:
                 form.columns.errors.append('columns wrongs format')
                 return render_run(run, form)
-
 
             if form.columns.data != '' or columns != '':
                 if columns == '' :

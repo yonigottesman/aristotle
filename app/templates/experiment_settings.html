@@ -29,7 +29,7 @@
       
       <div class="form-group {% if compilation_error %} has-error {% endif %}">
         {{form.column_extract_code.label}}
-        {{form.column_extract_code(class="form-control",rows="10",placeholder=experiment.column_extract_code)}}
+        {{form.column_extract_code(class="form-control",rows="10")}}
         {% if compilation_error %}
         <span style="color: red;">[{{ compilation_error }}]</span>
         {% endif %}
