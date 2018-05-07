@@ -40,7 +40,7 @@ class Experiment(db.Model):
 class Run(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(50))
-    run_result = db.Column(db.String(500))
+    run_result = db.Column(db.String(25000))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     experiment_id = db.Column(db.Integer, db.ForeignKey('experiment.id'))
     columns = db.Column(db.String(400))
