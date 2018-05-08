@@ -185,7 +185,8 @@ def render_experiment(experiment, add_run_form):
     t = create_experiment_table(runs)
     table = t[1:]
     columns = t[0]
-    add_run_form.columns.data = runs[-1].columns+','
+    if len(runs) > 1:
+        add_run_form.columns.data = runs[-1].columns+','
     add_experiment_form = AddExperimentForm()
 
     return render_template("experiment.html", title='Experiment', add_run_form=add_run_form
