@@ -4,8 +4,12 @@
     python3 -m venv venv
     source venv/bin/activate
     pip3 install -r requirements.txt
-
-    flask db upgrade (for sqlite use: flask db stamp HEAD)
+    
+    non sqlite:
+    flask db upgrade 
+    sqlite:
+    db.create_all() (in flask shell)
+    flask db stamp HEAD
 
     export FLASK_APP=aristotle.py
     export FLASK_DEBUG=1
