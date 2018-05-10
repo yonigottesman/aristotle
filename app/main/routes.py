@@ -70,8 +70,13 @@ def run(experiment_id,run_id):
 
     if form.validate_on_submit():
         if form.delete.data == True:
+            run_images = run.files.all()
+            for im in run_images:
+                file_path = images.path(im.file_name)
+                os.remove(file_path)
+            
             db.session.delete(run)
-            db.session.commit()
+            db.session.commit() 
             return redirect(url_for('main.experiment', experiment_id=experiment_id))
         else:
             
