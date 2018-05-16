@@ -2,6 +2,7 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
+ <input id="btnHide" type="button" value="Hide Column" onclick="hide_column(123);" />
 <div class="row">
   <div class="col-sm-3">
     {% include '_experiments.html' %}      
@@ -24,10 +25,18 @@
         <table class="table table-hover table-striped table-bordered table-hover model-list">
           <thead class="thead-dark">
             <tr>
-              <th scope="col"></th>
+              <th scope="col">
+
+
+
+
+              </th>
               <th scope="col"></th>
               {% for i in column_range %}
-              <th scope="col">{{columns[i]}}</th>
+              <th scope="col">
+                {{columns[i]}}
+                <button type="button" class="btn btn-info btn-xs" onclick="hide_column({{i+3}});">Hide</button>
+              </th>
               {% endfor %}
             </tr>
           </thead>

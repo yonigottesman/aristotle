@@ -84,6 +84,14 @@
       });
     </script>
     
+    <script type="text/javascript">
+      function hide_column(column) {
+          var nth_td = "td:nth-child(" + column + ")"
+          var nth_th = "th:nth-child(" + column + ")"
+          $(nth_td + "," +  nth_th).hide();
+      };
+    </script>
+
     
     {% endblock %}
     
