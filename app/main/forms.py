@@ -31,7 +31,7 @@ class AddExperimentForm(FlaskForm):
     
 class EditExperimentForm(FlaskForm):
     description = StringField('Description', validators=[])
-    columns = StringField('Columns - CSV String', validators=[])
+    column_ignore_list = StringField('Hidden Column list', validators=[])
     delete = BooleanField('Delete Experiment')
     column_extract_code = TextAreaField('Parse run output code to colunms', validators=[])
     submit = SubmitField('Update')    

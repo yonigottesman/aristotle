@@ -22,10 +22,12 @@
         {% endfor %}
       </div>
       
-      <!-- <div class="form-group "> -->
-      <!--   {{form.columns.label}} -->
-      <!--   {{form.columns(class="form-control")}} -->
-      <!-- </div> -->
+      <div class="form-group ">
+        {{form.column_ignore_list.label}}
+        {{form.column_ignore_list(class="form-control",value=experiment.column_ignore_list)}}
+      </div>
+
+
       
       <div class="form-group {% if compilation_error %} has-error {% endif %}">
         {{form.column_extract_code.label}}

@@ -33,6 +33,8 @@ class Experiment(db.Model):
                            , cascade='delete')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     column_extract_code = db.Column(db.String(600))
+    column_ignore_list = db.Column(db.String(2000))
+    
     def __repr__(self):
         return '<Experiment {}>'.format(self.description)    
 

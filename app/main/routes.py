@@ -141,7 +141,7 @@ def validat_csv(line):
     return True
 
 
-def create_experiment_table(runs):
+def create_experiment_table(runs,ignore_list=''):
     column_names = []
     run_columns_dict = {}
 
@@ -156,6 +156,8 @@ def create_experiment_table(runs):
         for column_raw in columns_raw:
             if column_raw.strip() != '':
                 name = column_raw.split('=')[0].strip()
+                if name in ignore_list:
+                    continue
                 value = column_raw.split('=')[1].strip()
                 if name not in column_names:
                     column_names.append(name)
@@ -187,7 +189,7 @@ def clean_columns(columns_csv):
 def render_experiment(experiment, add_run_form):
     experiments = current_user.experiments.all()
     runs = current_user.runs.filter(Run.experiment_id==experiment.id)
-    t = create_experiment_table(runs)
+    t = create_experiment_table(runs,experiment.column_ignore_list)
     table = t[1:]
     columns = t[0]
     if len(runs.all()) > 0:
@@ -322,8 +324,8 @@ def experiment_settings(experiment_id):
         else:
             if form.description.data != '':
                 experiment.description = form.description.data
-            if form.columns.data != '':
-                experiment.columns = form.columns.data
+            if form.column_ignore_list.data != '':
+                experiment.column_ignore_list = form.column_ignore_list.data
             if form.column_extract_code.data != '':
                 experiment.column_extract_code = form.column_extract_code.data
                 try:
