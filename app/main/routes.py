@@ -156,7 +156,7 @@ def create_experiment_table(runs,ignore_list=''):
         for column_raw in columns_raw:
             if column_raw.strip() != '':
                 name = column_raw.split('=')[0].strip()
-                if name in ignore_list:
+                if ignore_list and name in ignore_list:
                     continue
                 value = column_raw.split('=')[1].strip()
                 if name not in column_names:
