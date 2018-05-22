@@ -86,9 +86,9 @@ def run(experiment_id,run_id):
                 # TODO This part should be done once when code is submitted.
                 source_code = experiment.column_extract_code
                 try:
-                    byte_code = compile_restricted(source_code, filename='<inline code>', mode='exec')
+                    byte_code = compile(source_code, filename='<inline code>', mode='exec')
                     loc = {}
-                    exec(byte_code,get_safe_globals(),loc)
+                    exec(byte_code,globals(),loc)
                 
                     columns = loc['parse'](form.run_result.data)
                     if columns is None:
@@ -218,9 +218,9 @@ def experiment(experiment_id):
             # TODO This part should be done once when code is submitted.
             source_code = experiment.column_extract_code
             try:
-                byte_code = compile_restricted(source_code, filename='<inline code>', mode='exec')
+                byte_code = compile(source_code, filename='<inline code>', mode='exec')
                 loc = {}
-                exec(byte_code,get_safe_globals(),loc)
+                exec(byte_code,globals(),loc)
                 
                 columns = loc['parse'](form.run_result.data)
                 if columns is None:
@@ -329,9 +329,9 @@ def experiment_settings(experiment_id):
             if form.column_extract_code.data != '':
                 experiment.column_extract_code = form.column_extract_code.data
                 try:
-                    byte_code = compile_restricted(experiment.column_extract_code, filename='<inline code>', mode='exec')
+                    byte_code = compile(experiment.column_extract_code, filename='<inline code>', mode='exec')
                     loc = {}
-                    exec(byte_code,get_safe_globals(),loc)
+                    exec(byte_code,globals(),loc)
                 except SyntaxError as e:
                     return render_settings(experiment, form, e)
 
