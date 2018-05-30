@@ -188,7 +188,7 @@ def clean_columns(columns_csv):
 
 def render_experiment(experiment, add_run_form):
     experiments = current_user.experiments.all()
-    runs = current_user.runs.filter(Run.experiment_id==experiment.id)
+    runs = current_user.runs.filter(Run.experiment_id==experiment.id).order_by(Run.id)
     t = create_experiment_table(runs,experiment.column_ignore_list)
     table = t[1:]
     columns = t[0]
