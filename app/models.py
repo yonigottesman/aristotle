@@ -29,10 +29,10 @@ class Experiment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(150))
     columns = db.Column(db.String(400))
-    runs = db.relationship('Run', backref='experiment', lazy='dynamic'
-                           , cascade='delete')
+    runs = db.relationship('Run', backref='experiment', lazy='dynamic',
+                           cascade='delete')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    column_extract_code = db.Column(db.String(600))
+    column_extract_code = db.Column(db.String(6000))
     column_ignore_list = db.Column(db.String(2000))
     
     def __repr__(self):
