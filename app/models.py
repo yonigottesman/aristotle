@@ -9,15 +9,14 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    runs = db.relationship('Run', backref='owner', lazy='dynamic'
-                           , cascade='delete')
-    experiments = db.relationship('Experiment', backref='owner', lazy='dynamic'
-                                  , cascade='delete')
+    runs = db.relationship('Run', backref='owner', lazy='dynamic',
+                           cascade='delete')
+    experiments = db.relationship('Experiment', backref='owner', lazy='dynamic',
+                                  cascade='delete')
 
-    
     def __repr__(self):
         return '<User {}>'.format(self.username)
-    
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -34,36 +33,36 @@ class Experiment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     column_extract_code = db.Column(db.String(6000))
     column_ignore_list = db.Column(db.String(2000))
-    
-    def __repr__(self):
-        return '<Experiment {}>'.format(self.description)    
 
-    
+    def __repr__(self):
+        return '<Experiment {}>'.format(self.description)
+
+
 class Run(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(50))
     run_result = db.Column(db.String(25000))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     experiment_id = db.Column(db.Integer, db.ForeignKey('experiment.id'))
-    columns = db.Column(db.String(400))
+    columns = db.Column(db.String(4000))
     result_inffered_columns = db.Column(db.String(4000))
-    files = db.relationship('FileContent', backref='run', lazy='dynamic'
-                            , cascade='delete')
+    files = db.relationship('FileContent', backref='run', lazy='dynamic',
+                            cascade='delete')
 
-    
     def __repr__(self):
-        return '<Run {}>'.format(self.description)    
+        return '<Run {}>'.format(self.description)
 
-    
+
 class FileContent(db.Model):
-    id = db.Column(db.Integer, primary_key=True) 
+    id = db.Column(db.Integer, primary_key=True)
     run_id = db.Column(db.Integer, db.ForeignKey('run.id'))
     file_name = db.Column(db.String(50))
 
     @property
     def imgsrc(self):
         return images.url(self.file_name)
-    
+
+
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
